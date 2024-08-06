@@ -65,3 +65,5 @@ end
 
 
 gem "nokogiri", "~> 1.16"
+
+gem "pry", "~> 0.14.2"
