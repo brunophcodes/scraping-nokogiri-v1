@@ -67,3 +67,5 @@ end
 gem "nokogiri", "~> 1.16"
 
 gem "pry", "~> 0.14.2"
+
+gem 'rexml', '~> 3.2.4'
