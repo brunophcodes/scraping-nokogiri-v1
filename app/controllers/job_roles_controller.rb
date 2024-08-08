@@ -7,23 +7,25 @@ class JobRolesController < ApplicationController
 
   def index
     #current_url = request.original_url
-
-    current_url = "https://rubyonremote.com/jobs/62960-senior-developer-grow-my-clinic-at-jane"
+    
+    # Featured and a lot of countries
+    current_url = "https://rubyonremote.com/jobs/62977-senior-ruby-on-rails-engineer-at-idelsoft"
+    #current_url = "https://rubyonremote.com/jobs/62960-senior-developer-grow-my-clinic-at-jane"
     #current_url = "https://jobs.rubyonrails.org/jobs/886"
 
     if current_url.include? "rubyonremote" 
-      ruby_on_remote_card
+      ruby_on_remote_card(current_url)
     elsif current_url.include? "rubyonrails" 
-      rails_job_board_card
+      rails_job_board_card(current_url)
     end
   end
 
   # Scraping Ruby on Remote Page example
-  def ruby_on_remote_card
+  def ruby_on_remote_card(uri)
     
     #  Problem with the first ld+json found -Still there, this one doesn't include a Job Posting XML::Node
     #uri = "https://rubyonremote.com/jobs/61412-junior-software-engineer-at-syntax"  
-    uri = "https://rubyonremote.com/jobs/62960-senior-developer-grow-my-clinic-at-jane"
+    #uri = "https://rubyonremote.com/jobs/62960-senior-developer-grow-my-clinic-at-jane"
       
     html_file = Nokogiri::HTML(URI.open(uri))
 
@@ -61,8 +63,8 @@ class JobRolesController < ApplicationController
     # Options to get the desired label for location:
     # 1. Get a regex from the aria-label="view remote jobs in Remote - Anywhere"
     # 2. Validate when the First Job-tags is 'Featured'
+    # 3. Validate when there're tags like 'Remote - EU' 'Remote - Europe' 'Remote - South America'
     @location_html = html_file.search('a.job-tags').first.text == "\n\n\n\nRemote - Anywhere\n" ? 'Worldwide' : html_file.search('a.job-tags').first.text
-
 
     # extra_notes -  (optional) Added on the board view
 
@@ -76,9 +78,9 @@ class JobRolesController < ApplicationController
   end
 
   # Scraping Rails Job Board Page example
-  def rails_job_board_card
+  def rails_job_board_card(uri)
     
-    uri = "https://jobs.rubyonrails.org/jobs/886"
+    #uri = "https://jobs.rubyonrails.org/jobs/886"
     
     # If I scrap a similar page it works: 
     # uri = "https://rubyonremote.com/jobs/62960-senior-developer-grow-my-clinic-at-jane" 
