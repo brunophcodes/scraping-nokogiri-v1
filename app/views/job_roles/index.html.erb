@@ -1,16 +1,51 @@
-<div>
-    <p>role_name: <%= @role_name %></p>
-    <p>company_name: <%= @company_name %></p>
-    <p>company_type: <%= @company_type %></p>
-    <p>company_business: <%= @company_business %></p>
-    <p>work_type: <%= @work_type %></p>
+<div
+  class="block max-w-[24rem] rounded-lg bg-slate-600 text-white text-left text-surface shadow-secondary-1 dark:bg-surface-dark dark:text-white">
+  <div class="p-6">
+    <h5 class="mb-1 text-xl font-medium leading-tight ">
+      <p><%= @role_name %></p>
+    </h5>
+    <h6
+      class="mb-2 text-base font-medium leading-tight text-surface/75 dark:text-neutral-300">
+      <%= @company_name %>
+    </h6>
+    <p class="me-5 p-1 bg-blue-900 inline-block rounded text-base font-normal leading-normal text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 dark:text-primary-400">
+      <%= @employment_type %> 
+    </p>
+    <p class="me-5 p-1 bg-blue-900 inline-block rounded text-base font-normal leading-normal text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 dark:text-primary-400">
+      <%= @work_type %>
+    </p>
+    <p
+      class="me-5 inline-block p-1 bg-blue-900 rounded text-base font-normal leading-normal text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 dark:text-primary-400">
+      <%= @company_business %>
+    </p>
+    <p class="me-5 my-4 p-1 bg-green-900 text-base leading-normal">
+     <%= @location %>
+    </p>
+    <p
+      class="mb-4 text-base leading-normal">
+      <%= @salary %>
+    </p>
+    <p
+      class="pointer-events-auto inline-block rounded text-base font-normal leading-normal text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 dark:text-primary-400">
+      <%= @technologies %>
+    </p>
+  </div>
+</div>
+
+<br>
+
+<div class="text-white">
+    <p> <%= @response %>
+    <p>company_type: <%= @company_type %> - Not well defined</p> 
     <p>role_url: <%= @role_url %></p>
     <p>company_url: <%= @company_url %></p>
     <p>salary: <%= @salary %></p>
     <p>location: <%= @location %></p>
     <p>technologies: <%= @technologies %></p>
     <p> --------------------------- </p>
-    <p> CHECK - HTML Description:  </p>
     <!--<p><%= @job_description_from_json %></p>-->
-    <p>location_html : <%= @location_html %>
+    <p> location_html : <%= @location_html %>
+    <p> date_posted <%= @date_posted %> </p>
+    <p> due_date_to_apply <%= @due_date_to_apply %> </p>
+    <%#>= image_tag(@company_logo) %>
 </div>
