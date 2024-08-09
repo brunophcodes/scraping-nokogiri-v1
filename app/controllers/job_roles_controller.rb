@@ -9,14 +9,28 @@ class JobRolesController < ApplicationController
     #current_url = request.original_url
     
     # Featured and a lot of countries
-    current_url = "https://rubyonremote.com/jobs/62977-senior-ruby-on-rails-engineer-at-idelsoft"
+    
+    # GoRails Examples:
+    current_url = "https://jobs.gorails.com/jobs/full-stack-developer-579015aa"
+    #current_url = "https://jobs.gorails.com/jobs/software-application-architect-a8c8607a"
+    #current_url = "https://jobs.gorails.com/jobs/senior-full-stack-engineer-ror-vue-or-ready-to-switch-c090013e"
+
+    # Ruby On Remote Examples:
+    #current_url = "https://rubyonremote.com/jobs/62977-senior-ruby-on-rails-engineer-at-idelsoft"
     #current_url = "https://rubyonremote.com/jobs/62960-senior-developer-grow-my-clinic-at-jane"
+
+    # Rails Job Board Examples
     #current_url = "https://jobs.rubyonrails.org/jobs/886"
+    #current_url = "https://jobs.rubyonrails.org/jobs/887"
 
     if current_url.include? "rubyonremote" 
       ruby_on_remote_card(current_url)
-    elsif current_url.include? "rubyonrails" 
+    elsif current_url.include? "gorails" 
+      go_rails_card(current_url)
+    elsif current_url.include? "rubyonrails"  
       rails_job_board_card(current_url)
+    else
+      @response = "Can't track the information"
     end
   end
 
@@ -77,7 +91,61 @@ class JobRolesController < ApplicationController
     # company_logo - data['hiringOrganization']['logo']
   end
 
+  # Scraping GoRails Jobs
+  def go_rails_card(uri)
+         
+    html_file = Nokogiri::HTML(URI.open(uri))
+
+    # Get the scripts with type="application/ld+json" and get the one with the JobRole info
+    # TODO - validate if the ld+json exists, case https://rubyonremote.com/jobs/61412-junior-software-engineer-at-syntax
+    jsons = html_file.search('script[type="application/ld+json"]')
+    json = jsons.children.select { |e|  e.text.include?("JobPosting") } 
+    @response = json ? 'Successful response' : "Can't track the information"
+    json_string = json[0].text
+    
+    data = JSON[json_string]
+
+    company_business_array = ['health', 'marketing', 'ecommerce', 'logistics', 'telecommunication', 'recruitment','saas', 'shopify']
+    common_technologies = ['ruby on rails', 'ruby', 'stimulus', 'hotwire', 'viewcomponents', 'javascript', 'typescript', 'react', 'vue', 'angular', 'postgresql', 'mysql', 'docker', 'api', 'sidekiq', 'aws']
+    
+    # (Optional) Use AI or make regex with a collection to check the most common business 
+    @company_business = company_business_array.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }
+    @role_name = data['title']
+    @company_name = data['hiringOrganization']['name']
+    @company_type = data['hiringOrganization']['@type']
+    @work_type = data['jobLocationType'] == 'TELECOMMUTE' ? 'Remote' : data['jobLocationType']
+    @role_url = uri
+    @company_url = data['hiringOrganization']['sameAs']
+    
+    if data['baseSalary']
+      @salary = data['baseSalary']['value']['minValue'] ? data['baseSalary']['value']['minValue'].to_s + '-' + data['baseSalary']['value']['maxValue'].to_s + ' ' + data['baseSalary']['currency'] : data['baseSalary']['value']['value'].to_s + '' + data['baseSalary']['value']['unitText']
+    else 
+      @salary = ""
+    end
+
+    @job_description = data['description']
+    
+    if data['applicantLocationRequirements']
+      @location = data['applicantLocationRequirements'].map { |elem| elem['name'] }
+    else 
+      @location = "Worldwide"
+    end
+
+    # Not included in the JSON body - Getting it from the HTML
+    @technologies = common_technologies.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }
+    
+    # extra_notes -  (optional) Added on the board view
+
+    # ADD new fields: 
+    @date_posted = data['datePosted']
+    @due_date_to_apply = data['validThrough']
+    @employment_type = data['employmentType'] == 'FULL_TIME' ? 'Full Time' : 'Not defined'
+    @company_logo = data['hiringOrganization']['logo'] ? data['hiringOrganization']['logo'] : '#'
+    # seniority_level = data['experienceRequirements']['monthsOfExperience']  The JSON doesn't include it everytime so if nil == Junior, or get from HTML (job-tags = Junior)
+  end
+
   # Scraping Rails Job Board Page example
+  # TODO: Fix error with the API
   def rails_job_board_card(uri)
     
     #uri = "https://jobs.rubyonrails.org/jobs/886"
