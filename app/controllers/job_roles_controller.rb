@@ -5,7 +5,7 @@ class JobRolesController < ApplicationController
   require 'json'
   require 'active_support/core_ext/hash'
 
-  def index
+  def index_2
     #current_url = request.original_url
     
     # Featured and a lot of countries
@@ -34,13 +34,50 @@ class JobRolesController < ApplicationController
     end
   end
 
+  def index #notion_api_test
+    client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
+    
+      properties = {
+        'Name': {
+          'title': [
+            {
+              'text': {
+                'content': 'Manzanaaaa'
+              }
+            }
+          ]
+        },
+        'Description': {
+            'rich_text': [
+              {
+                'text': {
+                  'content': 'Producto de prueba'
+                }
+              }
+            ]
+        },
+        'Food group': {
+          'select': {
+              'name': '🍎Fruit'
+          }
+        },
+        'Price': {
+            'number': 2.5
+        }
+      }
+    
+
+    client.create_page(
+      parent: { database_id: '116038c93b0d4439b8979105cfa496e3'}, 
+      properties: properties
+      )
+  end
+
+
+
   # Scraping Ruby on Remote Page example
   def ruby_on_remote_card(uri)
-    
-    #  Problem with the first ld+json found -Still there, this one doesn't include a Job Posting XML::Node
-    #uri = "https://rubyonremote.com/jobs/61412-junior-software-engineer-at-syntax"  
-    #uri = "https://rubyonremote.com/jobs/62960-senior-developer-grow-my-clinic-at-jane"
-      
+       
     html_file = Nokogiri::HTML(URI.open(uri))
 
     # Get the scripts with type="application/ld+json" and get the one with the JobRole info
@@ -57,7 +94,10 @@ class JobRolesController < ApplicationController
     @company_business = company_business_array.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }[0].capitalize
     @role_name = data['title']
     @company_name = data['hiringOrganization']['name']
+
+    # TODO: Improve company_type, search in the job description about the company (Product) vs (Consultant) etc or discard this field
     @company_type = data['hiringOrganization']['@type']
+
     @work_type = data['jobLocationType'] == 'TELECOMMUTE' ? 'Remote' : data['jobLocationType']
     @role_url = uri
     @company_url = data['hiringOrganization']['sameAs']
@@ -112,7 +152,10 @@ class JobRolesController < ApplicationController
     @company_business = company_business_array.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }
     @role_name = data['title']
     @company_name = data['hiringOrganization']['name']
+
+    # TODO: Improve company_type, search in the job description about the company (Product) vs (Consultant) etc or discard this field
     @company_type = data['hiringOrganization']['@type']
+    
     @work_type = data['jobLocationType'] == 'TELECOMMUTE' ? 'Remote' : data['jobLocationType']
     @role_url = uri
     @company_url = data['hiringOrganization']['sameAs']
@@ -138,9 +181,9 @@ class JobRolesController < ApplicationController
 
     # ADD new fields: 
     @date_posted = data['datePosted']
-    @due_date_to_apply = data['validThrough']
+    @due_date_to_apply = data['validThrough']  #Transform into another format
     @employment_type = data['employmentType'] == 'FULL_TIME' ? 'Full Time' : 'Not defined'
-    @company_logo = data['hiringOrganization']['logo'] ? data['hiringOrganization']['logo'] : '#'
+    # @company_logo = data['hiringOrganization']['logo'] ? data['hiringOrganization']['logo'] : '#'
     # seniority_level = data['experienceRequirements']['monthsOfExperience']  The JSON doesn't include it everytime so if nil == Junior, or get from HTML (job-tags = Junior)
   end
 

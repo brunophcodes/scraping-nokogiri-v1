@@ -40,3 +40,7 @@ module ScrapingNokogiriV1
     config.generators.system_tests = nil
   end
 end
+
+Notion.configure do |config|
+  config.token = ENV['NOTION_API_TOKEN']
+end
