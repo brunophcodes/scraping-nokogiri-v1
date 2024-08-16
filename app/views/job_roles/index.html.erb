@@ -35,7 +35,10 @@
 <br>
 
 <div class="text-white">
-    <p> <%= @response %>
+    <p> Pages: <%= @tech_hash %>
+
+    <p> --------------------------- </p>
+    <p> <%= @page %>
     <p>company_type: <%= @company_type %> - Not well defined</p> 
     <p>role_url: <%= @role_url %></p>
     <p>company_url: <%= @company_url %></p>
@@ -44,7 +47,7 @@
     <p>technologies: <%= @technologies %></p>
     <p> --------------------------- </p>
     <!--<p><%= @job_description_from_json %></p>-->
-    <p> location_html : <%= @location_html %>
+    <p> location : <%= @location_array %>
     <p> date_posted <%= @date_posted %> </p>
     <p> due_date_to_apply <%= @due_date_to_apply %> </p>
     <%#>= image_tag(@company_logo) %>
