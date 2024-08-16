@@ -1,18 +1,18 @@
 class JobRolesController < ApplicationController
+  before_action :get_technologies, only: %i[ index ]
+
   require 'open-uri'
   require 'nokogiri'
   require 'pry'
   require 'json'
   require 'active_support/core_ext/hash'
 
-  def index_2
+  def index
     #current_url = request.original_url
     
-    # Featured and a lot of countries
-    
     # GoRails Examples:
-    current_url = "https://jobs.gorails.com/jobs/full-stack-developer-579015aa"
-    #current_url = "https://jobs.gorails.com/jobs/software-application-architect-a8c8607a"
+    #current_url = "https://jobs.gorails.com/jobs/full-stack-developer-579015aa"
+    current_url = "https://jobs.gorails.com/jobs/software-application-architect-a8c8607a"
     #current_url = "https://jobs.gorails.com/jobs/senior-full-stack-engineer-ror-vue-or-ready-to-switch-c090013e"
 
     # Ruby On Remote Examples:
@@ -23,54 +23,19 @@ class JobRolesController < ApplicationController
     #current_url = "https://jobs.rubyonrails.org/jobs/886"
     #current_url = "https://jobs.rubyonrails.org/jobs/887"
 
-    if current_url.include? "rubyonremote" 
+    if current_url.include? "rubyonremote"
       ruby_on_remote_card(current_url)
     elsif current_url.include? "gorails" 
       go_rails_card(current_url)
-    elsif current_url.include? "rubyonrails"  
+    elsif current_url.include? "rubyonrails"
       rails_job_board_card(current_url)
     else
       @response = "Can't track the information"
     end
   end
 
-  def index #notion_api_test
-    client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
-    
-      properties = {
-        'Name': {
-          'title': [
-            {
-              'text': {
-                'content': 'Manzanaaaa'
-              }
-            }
-          ]
-        },
-        'Description': {
-            'rich_text': [
-              {
-                'text': {
-                  'content': 'Producto de prueba'
-                }
-              }
-            ]
-        },
-        'Food group': {
-          'select': {
-              'name': '🍎Fruit'
-          }
-        },
-        'Price': {
-            'number': 2.5
-        }
-      }
-    
-
-    client.create_page(
-      parent: { database_id: '116038c93b0d4439b8979105cfa496e3'}, 
-      properties: properties
-      )
+  def index_api #notion_api_test
+    puts @tech_hash.keys
   end
 
 
@@ -80,13 +45,7 @@ class JobRolesController < ApplicationController
        
     html_file = Nokogiri::HTML(URI.open(uri))
 
-    # Get the scripts with type="application/ld+json" and get the one with the JobRole info
-    # TODO - validate if the ld+json exists, case https://rubyonremote.com/jobs/61412-junior-software-engineer-at-syntax
-    jsons = html_file.search('script[type="application/ld+json"]')
-    json = jsons.children.select { |e|  e.text.include?("JobPosting") } 
-    json_string = json[0].text
-    
-    data = JSON[json_string]
+    data = get_job_role_data(html_file)
 
     company_business_array = ['health', 'marketing', 'ecommerce', 'logistics', 'telecommunication']
     
@@ -101,7 +60,7 @@ class JobRolesController < ApplicationController
     @work_type = data['jobLocationType'] == 'TELECOMMUTE' ? 'Remote' : data['jobLocationType']
     @role_url = uri
     @company_url = data['hiringOrganization']['sameAs']
-    @salary = data['baseSalary']['minValue'] ? data['baseSalary']['minValue'] + '-' + data['baseSalary']['maxValue'] + ' ' + data['baseSalary']['currency'] : data['baseSalary']['value']['value'].to_s + '' + data['baseSalary']['value']['unitText']
+    @salary = data['baseSalary']['minValue'] ? data['baseSalary']['minValue'] + '-' + data['baseSalary']['maxValue'] + ' ' + data['baseSalary']['currency'] : data['baseSalary']['value']['value'].to_s + ' ' + data['baseSalary']['value']['unitText']
     @job_description = data['description']
 
     # Not included in the JSON body - Getting it from the HTML
@@ -112,50 +71,46 @@ class JobRolesController < ApplicationController
     # The location Array is not properly implemented, it seems like there's a bug in the page, The Job tag 
     # says 'Remote - US' but there's a list of over 249 countries
     # Validate if there's more than 1 in the array 
-    @location = data['applicantLocationRequirements'].map { |elem| elem['name'] }
+
+    @location_array = data['applicantLocationRequirements'].map { |elem| elem['name'] }
 
     # Options to get the desired label for location:
     # 1. Get a regex from the aria-label="view remote jobs in Remote - Anywhere"
     # 2. Validate when the First Job-tags is 'Featured'
     # 3. Validate when there're tags like 'Remote - EU' 'Remote - Europe' 'Remote - South America'
-    @location_html = html_file.search('a.job-tags').first.text == "\n\n\n\nRemote - Anywhere\n" ? 'Worldwide' : html_file.search('a.job-tags').first.text
+    @location = html_file.search('a.job-tags').first.text == "\n\n\n\nRemote - Anywhere\n" ? 'Worldwide' : html_file.search('a.job-tags').first.text
 
     # extra_notes -  (optional) Added on the board view
 
     # ADD new fields: 
-    #
-    # seniority_level = data['experienceRequirements']['monthsOfExperience']  The JSON doesn't include it everytime so if nil == Junior, or get from HTML (job-tags = Junior)
-    # date_posted - data['datePosted']
-    # due_date_to_apply - data['validThough']
-    # employment_type - data['employmentType']
-    # company_logo - data['hiringOrganization']['logo']
+    
+    @date_posted = data['datePosted']
+    @due_date_to_apply = data['validThrough']  #Transform into another format
+    @employment_type = data['employmentType'] == 'full-time' ? 'Full Time' : 'Not defined'
   end
 
   # Scraping GoRails Jobs
   def go_rails_card(uri)
-         
-    html_file = Nokogiri::HTML(URI.open(uri))
-
-    # Get the scripts with type="application/ld+json" and get the one with the JobRole info
-    # TODO - validate if the ld+json exists, case https://rubyonremote.com/jobs/61412-junior-software-engineer-at-syntax
-    jsons = html_file.search('script[type="application/ld+json"]')
-    json = jsons.children.select { |e|  e.text.include?("JobPosting") } 
-    @response = json ? 'Successful response' : "Can't track the information"
-    json_string = json[0].text
     
-    data = JSON[json_string]
+    html_file = Nokogiri::HTML(URI.open(uri))
+    data = get_job_role_data(html_file)
+    common_company_business = ['health', 'marketing', 'ecommerce', 'logistics', 'telecommunication', 'recruitment','saas', 'shopify']
 
-    company_business_array = ['health', 'marketing', 'ecommerce', 'logistics', 'telecommunication', 'recruitment','saas', 'shopify']
-    common_technologies = ['ruby on rails', 'ruby', 'stimulus', 'hotwire', 'viewcomponents', 'javascript', 'typescript', 'react', 'vue', 'angular', 'postgresql', 'mysql', 'docker', 'api', 'sidekiq', 'aws']
+    #Add more technologies to the source of technologies
+    common_technologies = @tech_hash.keys
+    # Manual technologies source array
+    #common_technologies = ['ruby on rails', 'ruby', 'stimulus', 'hotwire', 'viewcomponents', 'javascript', 'typescript', 'react', 'vue', 'angular', 'postgresql', 'mysql', 'docker', 'api', 'sidekiq', 'aws']
     
     # (Optional) Use AI or make regex with a collection to check the most common business 
-    @company_business = company_business_array.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }
+    @company_business = common_company_business.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }
+    # Not included in the JSON body - Getting it from the HTML
+    @technologies = common_technologies.select { | elem | data['description'].include? elem ? elem : 'Not defined' }
+
     @role_name = data['title']
     @company_name = data['hiringOrganization']['name']
 
     # TODO: Improve company_type, search in the job description about the company (Product) vs (Consultant) etc or discard this field
     @company_type = data['hiringOrganization']['@type']
-    
     @work_type = data['jobLocationType'] == 'TELECOMMUTE' ? 'Remote' : data['jobLocationType']
     @role_url = uri
     @company_url = data['hiringOrganization']['sameAs']
@@ -173,12 +128,7 @@ class JobRolesController < ApplicationController
     else 
       @location = "Worldwide"
     end
-
-    # Not included in the JSON body - Getting it from the HTML
-    @technologies = common_technologies.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }
-    
-    # extra_notes -  (optional) Added on the board view
-
+    wa
     # ADD new fields: 
     @date_posted = data['datePosted']
     @due_date_to_apply = data['validThrough']  #Transform into another format
@@ -212,7 +162,7 @@ class JobRolesController < ApplicationController
     #data = JSON.generate(json_string)
     #data = ActiveSupport::JSON.decode(json_string)
 
-    @role_name = data['title']   
+    @role_name = data['title']
     @company_name = data['hiringOrganization']['name']
     @company_type = data['hiringOrganization']['@type']
     @company_business = data['']  # Use AI or make regex with a collection to check the most common business types ['Health', 'Marketing', 'Ecommerce', etc]
@@ -233,5 +183,45 @@ class JobRolesController < ApplicationController
     #  Not included
     # seniority_level = data['experienceRequirements']['monthsOfExperience']  The JSON doesn't include it everytime so if nil == Junior, or get from HTML (job-tags = Junior)
     # @technologies = html_file.css('.po').map { |elem| elem.text }
+  end
+
+  private
+
+  def get_job_role_data(html)
+    # Get the scripts with type="application/ld+json" and get the one with the JobRole info
+    # TODO - validate if the ld+json exists, case https://rubyonremote.com/jobs/61412-junior-software-engineer-at-syntax
+    jsons = html.search('script[type="application/ld+json"]')
+    json = jsons.children.select { |e|  e.text.include?("JobPosting") } 
+    json_string = json[0].text
+    
+    JSON[json_string]
+  end
+
+  def get_technologies
+    client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
+
+    client.database_query(database_id: '8e5a839422664a3499c69ca34f5c912c') do |page|  
+      @pages = page.results
+      @technologies_array = page.results.map { |elem| elem.properties['Position'].multi_select }
+    end
+
+    @tech_hash = { }
+
+    @technologies_array.map do |elem|
+      elem.map do |arr|
+        @tech_hash.store( arr.name, arr.color ) 
+      end
+    end
+
+    # Verify what's the form of the retrieved data for company business and technologies
+    # filter = { 
+    #   'property': 'Position',
+    #    'multi_select': {
+    #       'is_not_empty': true
+    #    }
+    # }
+
+    #Brings whole database and is not easy to get the data
+    #@data = client.database_query(database_id: '8e5a839422664a3499c69ca34f5c912c', filter:filter)  
   end
 end
