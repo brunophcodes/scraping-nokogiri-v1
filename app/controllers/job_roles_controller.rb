@@ -20,8 +20,6 @@ class JobRolesController < ApplicationController
       ruby_on_remote_card(current_url)
     elsif current_url.include? "gorails" 
       go_rails_card(current_url)
-    elsif current_url.include? "rubyonrails"
-      rails_job_board_card(current_url)
     else
       @response = "Can't track the information"
     end
