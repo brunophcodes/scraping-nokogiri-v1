@@ -20,8 +20,6 @@ class JobRolesController < ApplicationController
       ruby_on_remote_card(current_url)
     elsif current_url.include? "gorails" 
       go_rails_card(current_url)
-    elsif current_url.include? "rubyonrails"
-      rails_job_board_card(current_url)
     else
       @response = "Can't track the information"
     end
@@ -274,54 +272,6 @@ class JobRolesController < ApplicationController
     properties: properties,
     children: children
     )
-  end
-
-  # Scraping Rails Job Board Page example
-  # TODO: Fix error with the API
-  def rails_job_board_card(uri)
-    
-    #uri = "https://jobs.rubyonrails.org/jobs/886"
-    
-    # If I scrap a similar page it works: 
-    # uri = "https://rubyonremote.com/jobs/62960-senior-developer-grow-my-clinic-at-jane" 
-
-    doc = Nokogiri::HTML(URI.open(uri))
-
-    # Nokogiri::XML::Element that includes the CDATA node with the JSON
-    json = doc.at('script[type="application/ld+json"]')
-    
-    #This already has the JSON parse result
-    json_string = json.child.text
-
-    data = JSON.load(json_string)
-    # I TRIED:
-    #data = JSON[json_string]
-    #data = JSON.parse(json_string)
-    #data = JSON.load(json_string)
-    #data = JSON.generate(json_string)
-    #data = ActiveSupport::JSON.decode(json_string)
-
-    @role_name = data['title']
-    @company_name = data['hiringOrganization']['name']
-    @company_type = data['hiringOrganization']['@type']
-    @company_business = data['']  # Use AI or make regex with a collection to check the most common business types ['Health', 'Marketing', 'Ecommerce', etc]
-    @work_type = data['jobLocationType'] == 'TELECOMMUTE' ? 'Remote' : data['jobLocationType']
-    @role_url = uri
-    @company_url = data['hiringOrganization']['sameAs']
-    @salary = data['baseSalary'] ? data['baseSalary']['value']['value'] + ' ' + data['baseSalary']['currency'] : empty
-    @job_description = data['description']
-    @location = data['applicantLocationRequirements']['name']
-
-    # Not included in the JSON body
-    
-    # date_posted - data['datePosted']
-    # due_date_to_apply - data['validThough']
-    # employment_type - data['employmentType']
-    # company_logo - data['hiringOrganization']['logo']
-
-    #  Not included
-    # seniority_level = data['experienceRequirements']['monthsOfExperience']  The JSON doesn't include it everytime so if nil == Junior, or get from HTML (job-tags = Junior)
-    # @technologies = html_file.css('.po').map { |elem| elem.text }
   end
 
   private
