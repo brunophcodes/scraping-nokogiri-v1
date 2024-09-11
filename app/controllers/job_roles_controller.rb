@@ -11,17 +11,10 @@ class JobRolesController < ApplicationController
     #current_url = request.original_url
     
     # GoRails Examples:
-    #current_url = "https://jobs.gorails.com/jobs/full-stack-developer-579015aa"
-    current_url = "https://jobs.gorails.com/jobs/software-application-architect-a8c8607a"
-    #current_url = "https://jobs.gorails.com/jobs/senior-full-stack-engineer-ror-vue-or-ready-to-switch-c090013e"
+    current_url = "https://jobs.gorails.com/jobs/senior-rails-software-engineer-63d8d0c6"
 
     # Ruby On Remote Examples:
     #current_url = "https://rubyonremote.com/jobs/62977-senior-ruby-on-rails-engineer-at-idelsoft"
-    #current_url = "https://rubyonremote.com/jobs/62960-senior-developer-grow-my-clinic-at-jane"
-
-    # Rails Job Board Examples
-    #current_url = "https://jobs.rubyonrails.org/jobs/886"
-    #current_url = "https://jobs.rubyonrails.org/jobs/887"
 
     if current_url.include? "rubyonremote"
       ruby_on_remote_card(current_url)
@@ -49,6 +42,7 @@ class JobRolesController < ApplicationController
 
     company_business_array = ['health', 'marketing', 'ecommerce', 'logistics', 'telecommunication']
     
+    # Fix this because most of the Job Roles description includes health as a benefit, "health covered, health insurance, etc"
     # (Optional) Use AI or make regex with a collection to check the most common business 
     @company_business = company_business_array.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }[0].capitalize
     @role_name = data['title']
@@ -104,7 +98,18 @@ class JobRolesController < ApplicationController
     # (Optional) Use AI or make regex with a collection to check the most common business 
     @company_business = common_company_business.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }
     # Not included in the JSON body - Getting it from the HTML
-    @technologies = common_technologies.select { | elem | data['description'].include? elem ? elem : 'Not defined' }
+    @technologies = common_technologies.select { | tech | data['description'].include? tech ? tech : 'Not defined' }
+
+    #For the API 
+    @tech_options = []
+
+    @technologies.each do |tech|
+      if @tech_hash.keys.include?(tech)
+        @tech_options << {name:tech, color: @tech_hash[tech] }  
+      else 
+        @tech_options << {name:tech, color: default }
+      end
+    end
 
     @role_name = data['title']
     @company_name = data['hiringOrganization']['name']
@@ -123,18 +128,152 @@ class JobRolesController < ApplicationController
 
     @job_description = data['description']
     
+    @location = []
+
     if data['applicantLocationRequirements']
       @location = data['applicantLocationRequirements'].map { |elem| elem['name'] }
     else 
-      @location = "Worldwide"
+      @location << "Worldwide"
     end
-    wa
-    # ADD new fields: 
+
+    #Get locations options from table
+
+    @location_options = []
+
+    @location.each do |loc|
+      if @tech_hash.keys.include?(loc)
+        @location_options << {name:loc }
+      end
+    end
+
     @date_posted = data['datePosted']
     @due_date_to_apply = data['validThrough']  #Transform into another format
     @employment_type = data['employmentType'] == 'FULL_TIME' ? 'Full Time' : 'Not defined'
-    # @company_logo = data['hiringOrganization']['logo'] ? data['hiringOrganization']['logo'] : '#'
-    # seniority_level = data['experienceRequirements']['monthsOfExperience']  The JSON doesn't include it everytime so if nil == Junior, or get from HTML (job-tags = Junior)
+
+    # Sending data to the Notion Page
+
+    client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
+
+    properties =     {
+      "Company Name": {
+        "title": [
+          {
+            "text": {
+              "content": @company_name
+            }
+          }
+        ]
+      },
+      "Role Name": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @role_name
+            }
+          }
+        ]
+      },
+      "Company Type": {
+        "select": {
+          "name": @company_type
+        }
+      },
+      "Work Type": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @work_type
+            }
+          }
+        ]
+      },
+      "Role Url": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @role_url,
+              "link": { "url": @role_url }
+            }
+          }
+        ]
+      },
+      "Company Url": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @company_url,
+              "link": { "url": @company_url }
+            }
+          }
+        ]
+      },
+      "Salary": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @salary
+            }
+          }
+        ]
+      },
+      "Status": {
+        "select": {
+          "name": "Test"
+        }
+      },
+      "Technologies": {
+        "multi_select": @tech_options
+      },
+      "Location": {
+        "multi_select": [
+          {
+            "name": "USA"
+          }
+        ]
+      },
+      "Date Posted": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @date_posted
+            }
+          }
+        ]
+      },
+      "Due Date": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @due_date_to_apply
+            }
+          }
+        ]
+      }
+    }
+
+    children = [
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "<li>Unlike a rigid separation between front end and back end, you'll engage in full-stack development, working with Ruby on Rails and React.</li><li>We prioritize creating an environment where our development team can concentrate on building and delivering features. This involves providing detailed specifications and designs, in which you will play a role, and minimizing distractions.</li><li>While we strive for efficiency, it's important to note that, being a small team in a rapidly growing business, flexibility is key, and embracing challenges is part of the journey for a successful candidate.</li><li><a href=\"https://stackshare.io/Japestrale/pinpoint\">Our full stack can be found&nbsp;<strong>here</strong>.</a></li></ul><div><br><strong>About the Role:</strong></div><ul><li>Collaborate within a squad to facilitate timely feature delivery, actively participating in planning, discovery, and design phases.</li><li>Provide insights and expertise on broader technical decisions impacting the team, including the review of work by junior developers</li><li>Actively suggesting enhancements to our technology stack, coding standards, and processes based on your observations and insights.</li></ul><div><br><strong>About You:</strong></div><ul><li>3-5 years of experience working professionally with Ruby on Rails</li><li>3+ YOE with React, Typescript, Web app development, and MVC frameworks.</li><li>Ability to quickly grasp new concepts and subjects, conduct thorough research, and effectively communicate findings to team members.</li><li>Demonstrated enthusiasm and care for the work performed. A genuine interest in the tasks at hand, coupled with a willingness to learn and grow professionally.</li><li>"
+              }
+            }
+          ]
+        }
+      }
+    ]
+
+    
+    client.create_page(
+    parent: { database_id: 'bf36075ff6a44ed9a836bdb4efb885e3'}, 
+    properties: properties,
+    children: children
+    )
   end
 
   # Scraping Rails Job Board Page example
@@ -200,9 +339,9 @@ class JobRolesController < ApplicationController
   def get_technologies
     client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
 
-    client.database_query(database_id: '8e5a839422664a3499c69ca34f5c912c') do |page|  
+    client.database_query(database_id: 'bf36075ff6a44ed9a836bdb4efb885e3') do |page|  
       @pages = page.results
-      @technologies_array = page.results.map { |elem| elem.properties['Position'].multi_select }
+      @technologies_array = page.results.map { |elem| elem.properties['Technologies'].multi_select }
     end
 
     @tech_hash = { }
