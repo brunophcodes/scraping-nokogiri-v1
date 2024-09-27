@@ -27,7 +27,7 @@
     </p>
     <p
       class="pointer-events-auto inline-block rounded text-base font-normal leading-normal text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 dark:text-primary-400">
-      <%= @technologies %>
+      <%= @tech_array %>
     </p>
   </div>
 </div>
@@ -40,14 +40,21 @@
     <p> --------------------------- </p>
     <p> <%= @page %>
     <p>company_type: <%= @company_type %> - Not well defined</p> 
+    <p>company_BUSINESS: <%= @company_business %> - Not well defined</p> 
+    <p> @employment_type:  <%= @employment_type%> </p>
+    <p> @work_type:  <%= @work_type%> </p>
     <p>role_url: <%= @role_url %></p>
     <p>company_url: <%= @company_url %></p>
     <p>salary: <%= @salary %></p>
     <p>location: <%= @location %></p>
+    <p> --------------------------------</p>
+    <p>tech array : <%= @tech_array %></p>
     <p>technologies: <%= @technologies %></p>
+    <p>tech_options: <%= @tech_options %></p>
+    <>
     <p> --------------------------- </p>
     <!--<p><%= @job_description_from_json %></p>-->
-    <p> location : <%= @location_array %>
+    <p> location array: <%= @location_array %>
     <p> date_posted <%= @date_posted %> </p>
     <p> due_date_to_apply <%= @due_date_to_apply %> </p>
     <%#>= image_tag(@company_logo) %>
