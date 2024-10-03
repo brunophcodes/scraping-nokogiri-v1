@@ -12,11 +12,13 @@ class JobRolesController < ApplicationController
 
 
   def index
-    #TOOD: Add Validation:
-    url =  params[:url]
+    @url =  params[:url]
 
-    if url
-      scrap_job_role(url)
+    if @url.include?("https://rubyonremote.com/jobs/") || @url.include?("https://jobs.gorails.com/jobs/") && @url != nil
+      scrap_job_role(@url)
+    else
+      redirect_to :home, notice: "URL not valid"
+      #TODO: Add alerts
     end
   end
 
@@ -239,5 +241,4 @@ class JobRolesController < ApplicationController
     end
     return @tech_options
   end
-
 end
