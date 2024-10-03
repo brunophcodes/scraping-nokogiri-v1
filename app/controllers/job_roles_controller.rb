@@ -7,22 +7,16 @@ class JobRolesController < ApplicationController
   require 'json'
   require 'active_support/core_ext/hash'
 
-  def index
-    #current_url = request.original_url
-    
-    # Ruby On Remote Examples:
-    #current_url = "https://rubyonremote.com/jobs/63821-back-end-engineer-ruby-stack-at-codekeeper"
-    #Multiple Locations:
-    #current_url = "https://rubyonremote.com/jobs/63998-senior-full-stack-ruby-on-rails-engineer-founding-team-at-singulate"  
-    
-    # GoRails Examples:
-    #current_url = "https://jobs.gorails.com/jobs/software-engineer-entry-to-mid-level-d73bf60a"
-    #Multiple locations:
-    #current_url = "https://jobs.gorails.com/jobs/senior-rails-software-engineer-63d8d0c6"
-    current_url = "https://jobs.gorails.com/jobs/senior-support-engineer-ruby-on-rails-b24830a9"
+  def home
+  end
 
-    if current_url 
-      scrap_job_role(current_url)
+
+  def index
+    #TOOD: Add Validation:
+    url =  params[:url]
+
+    if url
+      scrap_job_role(url)
     end
   end
 
