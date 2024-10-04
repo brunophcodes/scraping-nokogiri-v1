@@ -17,8 +17,7 @@ class JobRolesController < ApplicationController
     if @url.include?("https://rubyonremote.com/jobs/") || @url.include?("https://jobs.gorails.com/jobs/") && @url != nil
       scrap_job_role(@url)
     else
-      redirect_to :home, notice: "URL not valid"
-      #TODO: Add alerts
+      redirect_to :home, alert: "URL not valid"
     end
   end
 

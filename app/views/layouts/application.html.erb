@@ -10,7 +10,10 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
-  <body class="bg-slate-800">
+  <body class="bg-slate-800 pt-4">
+    <div class="flex flex-col max-w-lg h-32 mx-auto">
+      <%= render 'shared/flashes' %>
+    </div>
     <div id="main">
       <%= yield %>
     </div>

@@ -1,0 +1,20 @@
+  <% if notice %>
+    <div class="inline-flex bg-teal-100 border border-teal-400 text-teal-700 px-4 py-3 my-2 mt-10 mx-auto rounded animate-fade"
+            role="alert">
+            <span class="block sm:inline pl-2">
+                <strong class="font-bold">Success</strong>
+                <%= notice %>
+            </span>
+    </div>
+  <% end %>
+
+
+  <% if alert %>
+    <div class="inline-flex justify-between bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 my-2 mt-10 mx-auto rounded animate-fade"
+            role="alert">
+            <span class="block sm:inline pl-2">
+                <strong class="font-bold">Warning</strong>
+                <%= alert %>
+            </span>
+    </div>
+  <% end %>
