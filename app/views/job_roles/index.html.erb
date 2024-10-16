@@ -1,61 +1,53 @@
+<h1 class="mx-auto my-10 max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-4xl"> This is how your card would look like in Notion</h1>
+
 <div
-  class="block max-w-[24rem] rounded-lg bg-slate-600 text-white text-left text-surface shadow-secondary-1 dark:bg-surface-dark dark:text-white">
+  class="block max-w-[32rem] rounded-lg bg-slate-600 text-white text-left text-surface shadow-secondary-1 dark:bg-surface-dark dark:text-white">
   <div class="p-6">
     <h5 class="mb-1 text-xl font-medium leading-tight ">
-      <p><%= @role_name %></p>
+      <p><%= @company_name %></p>
     </h5>
     <h6
       class="mb-2 text-base font-medium leading-tight text-surface/75 dark:text-neutral-300">
-      <%= @company_name %>
+      <%= @role_name %>
     </h6>
-    <p class="me-5 p-1 bg-blue-900 inline-block rounded text-base font-normal leading-normal text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 dark:text-primary-400">
+    <p class="me-5 p-1 bg-blue-900 inline-block rounded text-base font-normal leading-normal text-primary dark:text-primary-400">
       <%= @employment_type %> 
     </p>
-    <p class="me-5 p-1 bg-blue-900 inline-block rounded text-base font-normal leading-normal text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 dark:text-primary-400">
+    <p class="me-5 p-1 bg-blue-900 inline-block rounded text-base font-normal leading-normal text-primary dark:text-primary-400">
       <%= @work_type %>
     </p>
     <p
-      class="me-5 inline-block p-1 bg-blue-900 rounded text-base font-normal leading-normal text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 dark:text-primary-400">
+      class="me-5 inline-block p-1 bg-blue-900 rounded text-base font-normal leading-normal text-primary dark:text-primary-400">
       <%= @company_business %>
     </p>
-    <p class="me-5 my-4 p-1 bg-green-900 text-base leading-normal">
-     <%= @location %>
-    </p>
+    <div>
+      <p class="me-5 my-4 p-1 inline-block bg-green-900 text-base leading-normal">
+      <%= @location %>
+      </p>
+    </div>
     <p
       class="mb-4 text-base leading-normal">
       <%= @salary %>
     </p>
-    <p
-      class="pointer-events-auto inline-block rounded text-base font-normal leading-normal text-primary transition duration-150 ease-in-out hover:text-primary-600 focus:text-primary-600 focus:outline-none focus:ring-0 active:text-primary-700 dark:text-primary-400">
-      <%= @tech_array %>
-    </p>
+    <% @tech_options.each do |tech|  %>
+      <p class="me-5 p-1 mb-3 bg-<%=tech[:color] == 'default' ? 'neutral' : tech[:color] %>-700 inline-block rounded text-base font-normal leading-tight text-primary dark:text-primary-400">
+         <%= tech[:name] %> 
+      </p>
+    <% end  %>
   </div>
 </div>
 
 <br>
 
-<div class="text-white">
-    <p> Pages: <%= @tech_hash %>
-
-    <p> --------------------------- </p>
-    <p> <%= @page %>
-    <p>company_type: <%= @company_type %> - Not well defined</p> 
-    <p>company_BUSINESS: <%= @company_business %> - Not well defined</p> 
-    <p> @employment_type:  <%= @employment_type%> </p>
-    <p> @work_type:  <%= @work_type%> </p>
-    <p>role_url: <%= @role_url %></p>
-    <p>company_url: <%= @company_url %></p>
-    <p>salary: <%= @salary %></p>
-    <p>location: <%= @location %></p>
-    <p> --------------------------------</p>
-    <p>tech array : <%= @tech_array %></p>
-    <p>technologies: <%= @technologies %></p>
-    <p>tech_options: <%= @tech_options %></p>
-    <>
-    <p> --------------------------- </p>
-    <!--<p><%= @job_description_from_json %></p>-->
-    <p> location array: <%= @location_array %>
-    <p> date_posted <%= @date_posted %> </p>
-    <p> due_date_to_apply <%= @due_date_to_apply %> </p>
-    <%#>= image_tag(@company_logo) %>
+<div class="text-left text-white">
+<p> --------------------------- </p>
+    <div class="">
+      <p class="text-xl font-bold m-2"> Technologies Tag Legend:</p>
+      <p class="me-5 m-2 p-1 bg-red-700 inline-block rounded text-base font-normal leading-tight text-primary dark:text-primary-400">Ruby Related </p>
+      <p class="me-5 m-2 p-1 bg-blue-700 inline-block rounded text-base font-normal leading-tight text-primary dark:text-primary-400"> Backend & DB </p>
+      <p class="me-5 m-2 p-1 bg-green-700 inline-block rounded text-base font-normal leading-tight text-primary dark:text-primary-400"> Frontend </p>
+      <p class="me-5 m-2 p-1 bg-purple-700 inline-block rounded text-base font-normal leading-tight text-primary dark:text-primary-400"> Cloud and Devops </p>
+      <p class="me-5 m-2 p-1 bg-pink-700 inline-block rounded text-base font-normal leading-tight text-primary dark:text-primary-400"> Testing, Monitoring and others </p>
+      <p class="me-5 m-2 p-1 bg-neutral-700 inline-block rounded text-base font-normal leading-tight text-primary dark:text-primary-400"> Mobile </p>
+    </div>
 </div>
