@@ -31,7 +31,6 @@ class JobRolesController < ApplicationController
   
     @role_name = data['title']
     @company_name = data['hiringOrganization']['name']
-    @work_type = data['jobLocationType'] == 'TELECOMMUTE' ? 'Remote' : data['jobLocationType']
     @role_url = uri
     @company_url = data['hiringOrganization']['sameAs']
     @date_posted = data['datePosted']
@@ -43,6 +42,8 @@ class JobRolesController < ApplicationController
   
     if uri.include? "rubyonremote"
       puts "------RUBYONREMOTE------"
+
+      @work_type = data['jobLocationType'] == 'TELECOMMUTE' ? 'Remote' : data['jobLocationType']
       #Technologies: 
       @tech_array = html_file.css('.menuitem').map { |elem| elem.text }
       @technologies = set_technologies(@tech_array)
@@ -54,17 +55,21 @@ class JobRolesController < ApplicationController
       @job_description = data['description']
     elsif uri.include? "gorails"
       puts '------GORAILS------'
+      @work_details = html_file.css('div.flex.flex-col.mt-1.pt-2').children.map { |e| e.text.strip! }.reject(&:blank?)
+
+      @work_type = data['jobLocationType'] == 'TELECOMMUTE' ? 'Remote' : @work_details[1]
       #Technologies:
       @tech_array = common_technologies.select { | tech | data['description'].include? tech ? tech : 'Not defined' }
       @technologies = set_technologies(@tech_array)
 
-  
-      if data['baseSalary']
+      if @work_details.count == 4
+        @salary = @work_details[3]
+      elsif data['baseSalary']
         @salary = data['baseSalary']['value']['minValue'] ? data['baseSalary']['value']['minValue'].to_s + '-' + data['baseSalary']['value']['maxValue'].to_s + ' ' + data['baseSalary']['currency'] : data['baseSalary']['value']['value'].to_s + '' + data['baseSalary']['value']['unitText']
-      else 
+      else
         @salary = ""
       end
-  
+      
       @location = html_file.css('div.flex.flex-shrink-0.items-center.text-sm').text.delete("\n").strip!.tr(',', '-')
 
       @job_description = html_file.css('div.mt-12.rich-text').text
