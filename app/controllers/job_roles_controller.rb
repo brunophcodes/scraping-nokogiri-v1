@@ -36,7 +36,7 @@ class JobRolesController < ApplicationController
     @date_posted = data['datePosted']
     @due_date_to_apply = data['validThrough']
     @company_type = 'Product'   
-    @employment_type = data['employmentType'] == 'full-time' || 'FULL_TIME' ? 'Full Time' : 'Not defined'
+    @employment_type = data['employmentType'] == 'full-time' || data['employmentType'] == 'FULL_TIME' ? 'Full Time' : 'Not defined'
     business_type = common_company_business.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }
     @company_business = business_type.size > 0 ? business_type[0].capitalize : 'Not defined'
   
