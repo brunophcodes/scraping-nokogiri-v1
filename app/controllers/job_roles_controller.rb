@@ -76,139 +76,142 @@ class JobRolesController < ApplicationController
     else 
       return "Can't track the information"
     end
-  
-    
-        # Sending data to the Notion Page
-  
-        client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
-  
-        properties =     {
-          "Company Name": {
-            "title": [
-              {
-                "text": {
-                  "content": @company_name
-                }
-              }
-            ]
-          },
-          "Role Name": {
-            "rich_text": [
-              {
-                "text": {
-                  "content": @role_name
-                }
-              }
-            ]
-          },
-          "Company Type": {
-            "select": {
-              "name": @company_type
-            }
-          },
-          "Work Type": {
-            "rich_text": [
-              {
-                "text": {
-                  "content": @work_type
-                }
-              }
-            ]
-          },
-          "Role Url": {
-            "rich_text": [
-              {
-                "text": {
-                  "content": @role_url,
-                  "link": { "url": @role_url }
-                }
-              }
-            ]
-          },
-          "Company Url": {
-            "rich_text": [
-              {
-                "text": {
-                  "content": @company_url,
-                  "link": { "url": @company_url }
-                }
-              }
-            ]
-          },
-          "Salary": {
-            "rich_text": [
-              {
-                "text": {
-                  "content": @salary
-                }
-              }
-            ]
-          },
-          "Status": {
-            "select": {
-              "name": "Test"
-            }
-          },
-          "Technologies": {
-            "multi_select": @technologies
-          },
-          "Location": {
-            "multi_select": [
-              {
-                "name": @location
-              }
-            ]
-          },
-          "Date Posted": {
-            "rich_text": [
-              {
-                "text": {
-                  "content": @date_posted
-                }
-              }
-            ]
-          },
-          "Due Date": {
-            "rich_text": [
-              {
-                "text": {
-                  "content": @due_date_to_apply
-                }
-              }
-            ]
-          }
-        }
-    
-        children = [
+
+    @@properties = {
+      "Company Name": {
+        "title": [
           {
-            "object": "block",
-            "type": "paragraph",
-            "paragraph": {
-              "rich_text": [
-                {
-                  "type": "text",
-                  "text": {
-                    "content": @job_description
-                  }
-                }
-              ]
+            "text": {
+              "content": @company_name
             }
           }
         ]
-        
-        #client.create_page(
-        #parent: { database_id: 'bf36075ff6a44ed9a836bdb4efb885e3'}, 
-        #properties: properties,
-        #children: children
-        #)
+      },
+      "Role Name": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @role_name
+            }
+          }
+        ]
+      },
+      "Company Type": {
+        "select": {
+          "name": @company_type
+        }
+      },
+      "Work Type": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @work_type
+            }
+          }
+        ]
+      },
+      "Role Url": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @role_url,
+              "link": { "url": @role_url }
+            }
+          }
+        ]
+      },
+      "Company Url": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @company_url,
+              "link": { "url": @company_url }
+            }
+          }
+        ]
+      },
+      "Salary": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @salary
+            }
+          }
+        ]
+      },
+      "Status": {
+        "select": {
+          "name": "Test"
+        }
+      },
+      "Technologies": {
+        "multi_select": @technologies
+      },
+      "Location": {
+        "multi_select": [
+          {
+            "name": @location
+          }
+        ]
+      },
+      "Date Posted": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @date_posted
+            }
+          }
+        ]
+      },
+      "Due Date": {
+        "rich_text": [
+          {
+            "text": {
+              "content": @due_date_to_apply
+            }
+          }
+        ]
+      }
+    }
+
+    @@children = [
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Test Text"
+              }
+            }
+          ]
+        }
+      }
+    ]
+
+    flash[:notice] = "Job role information collected"
+  end
+
+  def create_notion_card
+    
+    client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
+    
+    client.create_page(
+      parent: { database_id: ENV['NOTION_TARGET_DB'] }, 
+      properties: @@properties,
+      children: @@children
+    )
+
+    flash[:notice] = "Card added to your Notion DB"
+    redirect_to :home    
   end
 
 
   private
 
   def get_job_role_data(html)
-    # Get the scripts with type="application/ld+json" and get the one with the JobRole info
-    # TODO - validate if the ld+json exists, case https://rubyonremote.com/jobs/61412-junior-software-engineer-at-syntax
     jsons = html.search('script[type="application/ld+json"]')
     json = jsons.children.select { |e|  e.text.include?("JobPosting") } 
     json_string = json[0].text
@@ -219,7 +222,7 @@ class JobRolesController < ApplicationController
   def get_common_technologies
     client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
 
-    client.database_query(database_id: 'bf36075ff6a44ed9a836bdb4efb885e3') do |page|  
+    client.database_query(database_id: ENV['NOTION_TARGET_DB']) do |page|  
       @pages = page.results
       @technologies_array = page.results.map { |elem| elem.properties['Technologies'].multi_select }
     end

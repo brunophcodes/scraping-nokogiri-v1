@@ -11,4 +11,5 @@ Rails.application.routes.draw do
   # root "posts#index"
   get 'home' => 'job_roles#home'
   get 'index' => 'job_roles#index'
+  post 'index'=> 'job_roles#create_notion_card'
 end
