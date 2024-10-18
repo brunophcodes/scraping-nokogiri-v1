@@ -29,7 +29,7 @@ class JobRolesController < ApplicationController
     common_company_business = ['health', 'marketing', 'ecommerce', 'logistics', 'telecommunication', 'recruitment','saas', 'shopify', 'fintech', 'payment']
 
     common_technologies = @tech_hash.keys
-    
+
     @role_name = data['title']
     @company_name = data['hiringOrganization']['name']
     @role_url = uri
@@ -80,7 +80,7 @@ class JobRolesController < ApplicationController
       return "Can't track the information"
     end
 
-    # --Gemini AI integration--
+    # Instantiating a new Gemini AI API client
     begin
       client = Gemini.new(
       credentials: {
@@ -89,8 +89,10 @@ class JobRolesController < ApplicationController
       },
       options: { model: 'gemini-1.5-flash', server_sent_events: true }
       )
-
-
+    
+    # Using Gemini AI to get a summary of the Job description, as the Notion API has a limit of 2000 characters for Text fields
+      to_summarize = client.generate_content( { contents: { role: 'user', parts: { text: "Please summarize the following text up to 2000 characters maximum getting the most important information like Requirements, Benefits and Responsabilities: #{@job_description} " }  } } )
+      @job_role_summary = to_summarize["candidates"][0]["content"]["parts"][0]["text"].strip!
 
     rescue GeminiError => error
       puts error.class
@@ -202,7 +204,7 @@ class JobRolesController < ApplicationController
             {
               "type": "text",
               "text": {
-                "content": "Test Text"
+                "content": @job_role_summary
               }
             }
           ]
