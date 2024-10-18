@@ -64,12 +64,13 @@ group :development do
 end
 
 
+gem 'dotenv'
+
+# Scraping tools:
 gem "nokogiri", "~> 1.16"
-
 gem "pry", "~> 0.14.2"
-
 gem 'rexml', '~> 3.2.4'
 
+# API's gems:
 gem 'notion-ruby-client'
-
-gem 'dotenv'
+gem 'gemini-ai', '~> 4.2.0'

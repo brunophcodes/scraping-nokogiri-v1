@@ -6,6 +6,7 @@ class JobRolesController < ApplicationController
   require 'pry'
   require 'json'
   require 'active_support/core_ext/hash'
+  require 'gemini-ai'
 
   def home
   end
@@ -26,9 +27,9 @@ class JobRolesController < ApplicationController
     html_file = Nokogiri::HTML(URI.open(uri))
     data = get_job_role_data(html_file)
     common_company_business = ['health', 'marketing', 'ecommerce', 'logistics', 'telecommunication', 'recruitment','saas', 'shopify', 'fintech', 'payment']
-      
+
     common_technologies = @tech_hash.keys
-  
+    
     @role_name = data['title']
     @company_name = data['hiringOrganization']['name']
     @role_url = uri
@@ -37,7 +38,9 @@ class JobRolesController < ApplicationController
     @due_date_to_apply = data['validThrough']
     @company_type = 'Product'   
     @employment_type = data['employmentType'] == 'full-time' || data['employmentType'] == 'FULL_TIME' ? 'Full Time' : 'Not defined'
-    business_type = common_company_business.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' }
+    
+    
+    business_type = common_company_business.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' } 
     @company_business = business_type.size > 0 ? business_type[0].capitalize : 'Not defined'
   
     if uri.include? "rubyonremote"
@@ -75,6 +78,22 @@ class JobRolesController < ApplicationController
       @job_description = html_file.css('div.mt-12.rich-text').text
     else 
       return "Can't track the information"
+    end
+
+    # --Gemini AI integration--
+    begin
+      client = Gemini.new(
+      credentials: {
+        service: 'generative-language-api',
+        api_key: ENV['GOOGLE_API_KEY']
+      },
+      options: { model: 'gemini-1.5-flash', server_sent_events: true }
+      )
+
+
+
+    rescue GeminiError => error
+      puts error.class
     end
 
     @@properties = {
@@ -222,7 +241,7 @@ class JobRolesController < ApplicationController
   def get_common_technologies
     client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
 
-    client.database_query(database_id: ENV['NOTION_TARGET_DB']) do |page|  
+    client.database_query(database_id: ENV['NOTION_TARGET_DB']) do |page|
       @pages = page.results
       @technologies_array = page.results.map { |elem| elem.properties['Technologies'].multi_select }
     end
