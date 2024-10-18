@@ -26,7 +26,7 @@ class JobRolesController < ApplicationController
 
     html_file = Nokogiri::HTML(URI.open(uri))
     data = get_job_role_data(html_file)
-    common_company_business = ['health', 'marketing', 'ecommerce', 'logistics', 'telecommunication', 'recruitment','saas', 'shopify', 'fintech', 'payment']
+    
 
     common_technologies = @tech_hash.keys
 
@@ -39,9 +39,6 @@ class JobRolesController < ApplicationController
     @company_type = 'Product'   
     @employment_type = data['employmentType'] == 'full-time' || data['employmentType'] == 'FULL_TIME' ? 'Full Time' : 'Not defined'
     
-    
-    business_type = common_company_business.select { | elem | data['description'].downcase.include? elem ? elem : 'Not defined' } 
-    @company_business = business_type.size > 0 ? business_type[0].capitalize : 'Not defined'
   
     if uri.include? "rubyonremote"
       puts "------RUBYONREMOTE------"
@@ -94,6 +91,10 @@ class JobRolesController < ApplicationController
       to_summarize = client.generate_content( { contents: { role: 'user', parts: { text: "Please summarize the following text up to 2000 characters maximum getting the most important information like Requirements, Benefits and Responsabilities: #{@job_description} " }  } } )
       @job_role_summary = to_summarize["candidates"][0]["content"]["parts"][0]["text"].strip!
 
+    # Getting a business type with the help of Gemini AI and the context 
+      business_type = client.generate_content( { contents: { role: 'user', parts: { text: "In up to 2 words can you tell me what is the company business of the company description given: #{@job_description} " }  } } )
+      @company_business = business_type["candidates"][0]["content"]["parts"][0]["text"].strip!
+
     rescue GeminiError => error
       puts error.class
     end
@@ -120,6 +121,11 @@ class JobRolesController < ApplicationController
       "Company Type": {
         "select": {
           "name": @company_type
+        }
+      },
+      "Company Business": {
+        "select": {
+          "name": @company_business
         }
       },
       "Work Type": {
