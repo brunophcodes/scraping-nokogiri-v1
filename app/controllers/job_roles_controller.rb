@@ -262,18 +262,15 @@ class JobRolesController < ApplicationController
 
   def get_common_technologies
     client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
+    notion_db = client.database(database_id: ENV['NOTION_TARGET_DB'])
+  
+    @technologies_array = notion_db.properties['Technologies'].multi_select.options
 
-    client.database_query(database_id: ENV['NOTION_TARGET_DB']) do |page|
-      @pages = page.results
-      @technologies_array = page.results.map { |elem| elem.properties['Technologies'].multi_select }
-    end
 
     @tech_hash = { }
 
     @technologies_array.map do |elem|
-      elem.map do |arr|
-        @tech_hash.store( arr.name, arr.color ) 
-      end
+      @tech_hash.store( elem.name, elem.color ) 
     end
   end
 
