@@ -94,8 +94,12 @@ class JobRolesController < ApplicationController
       )
     
     # Using Gemini AI to get a summary of the Job description, as the Notion API has a limit of 2000 characters for Text fields
-      to_summarize = client.generate_content( { contents: { role: 'user', parts: { text: "Please summarize the following text up to 2000 characters maximum getting the most important information like Requirements, Benefits and Responsabilities: #{@job_description} " }  } } )
-      @job_role_summary = to_summarize["candidates"][0]["content"]["parts"][0]["text"].strip!
+      loop do 
+        to_summarize = client.generate_content( { contents: { role: 'user', parts: { text: "Please summarize the following text up to 1800 characters maximum (this condition is CRITICAL: you can't surpass the 1800 characters) getting the most important information like Requirements, Benefits and Responsabilities. NOTICE: DO NOT include a note clarifying that you respected the 1800 characters limit nor indicating the total number of characters, because it sums and affects the final count of characters: #{@job_description} " }  }, generationConfig: { maxOutputTokens: 400 } } )
+        @job_role_summary = to_summarize["candidates"][0]["content"]["parts"][0]["text"].strip!
+        break if @job_role_summary.size < 2000
+        puts "The job Role Summary is #{@job_role_summary.size}"
+      end
 
     # Getting a business type with the help of Gemini AI and the context 
       business_type = client.generate_content( { contents: { role: 'user', parts: { text: "In up to 2 words can you tell me what is the company business of the company description given: #{@job_description} " }  } } )
