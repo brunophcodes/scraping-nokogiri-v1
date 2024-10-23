@@ -13,7 +13,7 @@ class JobRolesController < ApplicationController
 
 
   def index
-    @url =  params[:url]
+    @url =  params[:url].strip
 
     if @url.include?("https://rubyonremote.com/jobs/") || @url.include?("https://jobs.gorails.com/jobs/") && @url != nil
       scrap_job_role(@url)
