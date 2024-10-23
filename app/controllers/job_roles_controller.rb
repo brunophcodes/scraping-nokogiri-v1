@@ -78,7 +78,8 @@ class JobRolesController < ApplicationController
         end
         
         @location = html_file.css('div.flex.flex-shrink-0.items-center.text-sm').text.delete("\n").strip!.tr(',', '-')
-
+        @location.size > 100 ? @location = @location.truncate(100, separator: ' ') : @location
+        
         @job_description = html_file.css('div.mt-12.rich-text').text
       else 
         return "Can't track the information"
