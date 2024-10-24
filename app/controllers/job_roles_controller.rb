@@ -1,5 +1,5 @@
 class JobRolesController < ApplicationController
-  before_action :get_common_technologies, only: %i[ index ]
+  before_action :get_common_technologies, :get_common_company_business, only: %i[ index ]
 
   require 'open-uri'
   require 'nokogiri'
@@ -30,6 +30,7 @@ class JobRolesController < ApplicationController
     if data != "expired"
 
       common_technologies = @tech_hash.keys
+      common_business = @business_hash.keys
 
       @role_name = data['title']
       @company_name = data['hiringOrganization']['name']
@@ -104,7 +105,8 @@ class JobRolesController < ApplicationController
         end
 
         # Getting a business type with the help of Gemini AI and the context 
-        business_type = client.generate_content( { contents: { role: 'user', parts: { text: "In up to 2 words can you tell me what is the company business of the company description given: #{@job_description} " }  } } )
+        
+        business_type = client.generate_content( { contents: { role: 'user', parts: { text: "Out of the options in #{common_business} can you please select which type of company business is the description mentioning, if you can't find the proper one in the options given please in up to 2 words can you tell me what is the company business of the company description given. Limit the answer to 1 to 2 words. #{@job_description} " }  } } )
         @company_business = business_type["candidates"][0]["content"]["parts"][0]["text"].strip!
       rescue GeminiError => error
         puts error.class
@@ -298,5 +300,19 @@ class JobRolesController < ApplicationController
       end
     end
     return @tech_options
+  end
+
+  def get_common_company_business
+    client = Notion::Client.new(token: ENV['NOTION_API_TOKEN'])
+    notion_db = client.database(database_id: ENV['NOTION_TARGET_DB'])
+  
+    @business_array = notion_db.properties['Company Business']['select'].options
+
+
+    @business_hash = { }
+
+    @business_array.map do |elem|
+      @business_hash.store( elem.name, elem.color ) 
+    end
   end
 end
