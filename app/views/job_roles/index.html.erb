@@ -1,4 +1,4 @@
-<h1 class="mx-auto my-10 max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-4xl"> This is how your card would look like in Notion</h1>
+<h1 class="mx-auto my-10 max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-4xl"> This is the key information regarding that job: </h1>
 
 <div class="self-center items-center flex flex-col sm:flex-row w-full px-4 sm:px-0">
   <div class="w-full sm:w-1/2 mb-5">  
@@ -40,7 +40,7 @@
     </div>
   </div>
     <div class="w-full sm:w-1/2">
-      <%= button_to "Send card to Notion", { action: "create_notion_card" }, class:'px-6 py-3 mb-6 bg-green-600 border-black text-white fill-white active:scale-95 duration-100 border will-change-transform overflow-hidden rounded-xl transition-all disabled:opacity-70'  %>
+      <%= button_to "Send to Notion", { action: "create_notion_card" }, class:'px-6 py-3 mb-6 bg-green-600 border-black text-white font-bold fill-white active:scale-95 duration-100 border will-change-transform overflow-hidden rounded-xl transition-all disabled:opacity-70'  %>
 
       <%= link_to "Go Back", home_path, class:'px-6 py-3 bg-black border-black text-white fill-white active:scale-95 duration-100 border will-change-transform overflow-hidden rounded-xl transition-all disabled:opacity-70' %>
     </div>
