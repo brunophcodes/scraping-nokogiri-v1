@@ -74,3 +74,6 @@ gem 'rexml', '~> 3.2.4'
 # API's gems:
 gem 'notion-ruby-client'
 gem 'gemini-ai', '~> 4.2.0'
+
+# Markdown parser:
+gem 'redcarpet'
