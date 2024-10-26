@@ -12,4 +12,10 @@ Rails.application.routes.draw do
   get 'home' => 'job_roles#home'
   get 'index' => 'job_roles#index'
   post 'index'=> 'job_roles#create_notion_card'
+
+  # Error pages:
+  get '/404', to: 'errors#not_found'
+  get '/406', to: 'errors#unacceptable'
+  get '/500', to: 'errors#internal_server'
+  get '/422', to: 'errors#unprocessable'
 end
