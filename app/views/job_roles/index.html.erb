@@ -60,6 +60,8 @@
     </div>
 </div>
 
-<div class="text-left text-white">
-  <%= @job_role_summary %>
+<p class="text-xl text-left font-bold m-3 text-white"> Job Description Summary:</p>
+
+<div class="bg-slate-600 text-left text-white p-6 text-xl">
+  <%= markdown(@job_role_summary) %>
 </div>
