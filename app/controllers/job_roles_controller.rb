@@ -38,7 +38,6 @@ class JobRolesController < ApplicationController
       @company_url = data['hiringOrganization']['sameAs']
       @date_posted = data['datePosted']
       @due_date_to_apply = data['validThrough']
-      @company_type = 'Product'
       
       if data['employmentType'] == 'full-time' || data['employmentType'] == 'FULL_TIME' 
         @employment_type = 'Full Time'
@@ -131,11 +130,6 @@ class JobRolesController < ApplicationController
             }
           ]
         },
-        "Company Type": {
-          "select": {
-            "name": @company_type
-          }
-        },
         "Company Business": {
           "select": {
             "name": @company_business
@@ -190,7 +184,7 @@ class JobRolesController < ApplicationController
         },
         "Status": {
           "select": {
-            "name": "Test"
+            "name": "Uncategorized"
           }
         },
         "Technologies": {
