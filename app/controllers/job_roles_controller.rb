@@ -184,7 +184,7 @@ class JobRolesController < ApplicationController
         },
         "Status": {
           "select": {
-            "name": "Uncategorized"
+            "name": "To apply"
           }
         },
         "Technologies": {
