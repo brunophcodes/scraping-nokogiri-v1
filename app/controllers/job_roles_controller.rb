@@ -92,7 +92,7 @@ class JobRolesController < ApplicationController
           service: 'generative-language-api',
           api_key: ENV['GOOGLE_API_KEY']
         },
-        options: { model: 'gemini-1.5-flash', server_sent_events: true }
+        options: { model: 'gemini-2.0-flash', server_sent_events: true }
         )
       
         # Using Gemini AI to get a summary of the Job description, as the Notion API has a limit of 2000 characters for Text fields
